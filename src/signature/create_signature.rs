@@ -1,7 +1,6 @@
 use ethers::{
     abi::AbiEncode,
     core::k256::{
-        ecdsa::{recoverable, signature::DigestSigner},
         elliptic_curve::FieldBytes,
         Secp256k1,
     },
@@ -97,13 +96,13 @@ fn sign_typed_data<T: Eip712>(payload: &T, wallet: &LocalWallet) -> Result<Signa
 }
 
 fn sign_hash(hash: H256, wallet: &LocalWallet) -> Signature {
-    let recoverable_sig: recoverable::Signature =
-        wallet.signer().sign_digest(Sha256Proxy::from(hash));
+    let (signature, recid) =
+        wallet.signer().sign_digest_recoverable(Sha256Proxy::from(hash)).unwrap();
 
-    let v = u8::from(recoverable_sig.recovery_id()) as u64 + 27;
+    let v = u8::from(recid) as u64 + 27;
 
-    let r_bytes: FieldBytes<Secp256k1> = recoverable_sig.r().into();
-    let s_bytes: FieldBytes<Secp256k1> = recoverable_sig.s().into();
+    let r_bytes: FieldBytes<Secp256k1> = signature.r().into();
+    let s_bytes: FieldBytes<Secp256k1> = signature.s().into();
     let r = U256::from_big_endian(r_bytes.as_slice());
     let s = U256::from_big_endian(s_bytes.as_slice());
 

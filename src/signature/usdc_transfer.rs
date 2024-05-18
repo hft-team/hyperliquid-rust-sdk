@@ -1,6 +1,5 @@
 use ethers::{
     contract::{Eip712, EthAbiType},
-    types::transaction::eip712::Eip712,
 };
 use serde::Serialize;
 
